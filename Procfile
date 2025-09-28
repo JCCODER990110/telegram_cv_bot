@@ -1,1 +1,1 @@
-python telegram_cv_bot.py
+web: python telegram_cv_bot.py
