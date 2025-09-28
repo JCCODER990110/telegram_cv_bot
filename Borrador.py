@@ -165,6 +165,7 @@ async def select_cv(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Barranquilla, Atlántico"
     )
 
+    # --- Mantener el formato HTML original ---
     body_html = f"""
     <html>
       <body>
@@ -195,14 +196,18 @@ async def select_cv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ok, error = send_email_smtp(msg)
     if ok:
         fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        confirm_text = (
-            "✅ Aplicación Exitosa:\n\n"
-            f"🏢 Nombre de la Empresa: {company}\n"
-            f"💼 Vacante: {vacancy}\n"
-            f"🕒 Fecha y Hora de Aplicación: {fecha_hora}\n"
-            f"📎 CV Enviado: {file_name}"
+
+        # Registrar en el chat en un nuevo mensaje
+        registro = (
+            "✅ *Aplicación Exitosa:*\n\n"
+            f"🏢 *Nombre de la Empresa:* {company}\n"
+            f"💼 *Vacante:* {vacancy}\n"
+            f"🕒 *Fecha y Hora de Aplicación:* {fecha_hora}\n"
+            f"📎 *CV Enviado:* {file_name}"
         )
-        # Botones Sí / No
+        await query.message.reply_text(registro, parse_mode="Markdown")
+
+        # Preguntar si desea nuevo envío
         keyboard = [
             [
                 InlineKeyboardButton("✅ Sí", callback_data="new_yes"),
@@ -210,8 +215,8 @@ async def select_cv(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text("¿Deseas realizar un nuevo envío?", reply_markup=reply_markup)
 
-        await query.edit_message_text(confirm_text, reply_markup=reply_markup)
         return CONFIRM_NEW
     else:
         await query.edit_message_text(f"❌ Error al enviar: {error}")
@@ -222,7 +227,7 @@ async def confirm_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "new_yes":
-        await query.edit_message_text("🔄 Perfecto, vamos a realizar un nuevo envío.\n\n✍️ Escribe el *nombre de la empresa*:")
+        await query.edit_message_text("🔄 Perfecto, vamos a realizar un nuevo envío.\n\n✍️ Escribe el *nombre de la empresa*:", parse_mode="Markdown")
         return COMPANY
     else:
         await query.edit_message_text("✅ Proceso finalizado. Cuando quieras enviar otro CV, usa /start.")

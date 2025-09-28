@@ -3,6 +3,7 @@
 
 import os
 import io
+import json
 import logging
 import mimetypes
 from dotenv import load_dotenv
@@ -50,9 +51,10 @@ COMPANY, VACANCY, EMAIL, SELECT_CV, CONFIRM_NEW = range(5)
 # --- Configuración de Google Drive ---
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
-creds = service_account.Credentials.from_service_account_file(
-    DRIVE_SERVICE_ACCOUNT_JSON, scopes=SCOPES
-)
+# ✅ Cambio aquí: cargar credenciales desde variable de entorno (JSON string)
+creds_info = json.loads(DRIVE_SERVICE_ACCOUNT_JSON)
+creds = service_account.Credentials.from_service_account_info(creds_info, scopes=SCOPES)
+
 drive_service = build("drive", "v3", credentials=creds, cache_discovery=False)
 
 # --- Helpers para Google Drive ---
